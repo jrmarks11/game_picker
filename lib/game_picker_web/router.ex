@@ -18,6 +18,7 @@ defmodule GamePickerWeb.Router do
     pipe_through :browser
 
     live "/", GameLive.Index, :index
+    live "/rocket", RocketLive.Index, :index
   end
 
   # Other scopes may use custom stacks.

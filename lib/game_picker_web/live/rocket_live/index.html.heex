@@ -1,0 +1,232 @@
+<div class="mx-auto max-w-full px-6">
+  <!-- Controls at Top -->
+  <div class="mb-4 pt-4">
+    <!-- Control Buttons at Top -->
+    <div class="flex justify-center gap-4 mb-4">
+      <button
+        phx-click="launch"
+        class={"px-6 py-3 text-white text-lg font-bold rounded-lg transition-all duration-200 " <>
+               if(@is_flying,
+                 do: "bg-gray-400 cursor-not-allowed",
+                 else: "bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95")}
+        disabled={@is_flying}
+      >
+        <%= if @is_flying do %>
+          🚀 Flying...
+        <% else %>
+          🚀 LAUNCH!
+        <% end %>
+      </button>
+
+      <button
+        phx-click="add_fuel"
+        class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-bold rounded-lg hover:scale-105 active:scale-95 transition-all duration-200"
+      >
+        ⛽ Add Fuel
+      </button>
+
+      <button
+        phx-click="reset"
+        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-lg hover:scale-105 active:scale-95 transition-all duration-200"
+      >
+        🔄 Reset
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Main Game Area with Side Stats -->
+  <div class="grid grid-cols-12 gap-8">
+    <!-- Left Stats & Advanced Controls -->
+    <div class="col-span-3 space-y-4">
+      <div class="bg-blue-100 rounded-lg p-3 text-center">
+        <p class="text-xs text-blue-600 font-semibold">Launches</p>
+        <p class="text-2xl font-bold text-blue-800"><%= @launch_count %></p>
+      </div>
+
+      <div class="bg-yellow-100 rounded-lg p-3 text-center">
+        <p class="text-xs text-yellow-600 font-semibold">Stars</p>
+        <p class="text-2xl font-bold text-yellow-800">⭐ <%= @stars_collected %></p>
+      </div>
+
+      <div class="bg-green-100 rounded-lg p-4">
+        <p class="text-sm text-green-600 font-semibold text-center">Fuel</p>
+        <div class="mt-2">
+          <div class="w-full bg-gray-200 rounded-full h-4">
+            <div
+              class="bg-green-500 h-4 rounded-full transition-all duration-300"
+              style={"width: #{@fuel}%"}
+            ></div>
+          </div>
+          <p class="text-center text-sm mt-1 text-green-700 font-bold"><%= @fuel %>/100</p>
+        </div>
+      </div>
+
+      <!-- Advanced Controls -->
+      <div class="bg-gray-100 rounded-lg p-4">
+        <h4 class="text-sm font-bold text-gray-800 mb-3 flex items-center">
+          <span class="mr-2">⚙️</span> Advanced Controls
+        </h4>
+
+        <!-- Custom Fuel Input -->
+        <div class="bg-white rounded-lg p-3 border border-gray-200">
+          <h5 class="text-xs font-semibold text-purple-800 mb-2 flex items-center">
+            <span class="mr-1 text-sm">⚡</span> Custom Fuel
+          </h5>
+          <form phx-submit="set_custom_fuel" class="space-y-2">
+            <input
+              type="number"
+              name="fuel"
+              min="0"
+              max="100"
+              placeholder="0-100"
+              class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+            />
+            <button
+              type="submit"
+              class="w-full px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded transition-colors"
+            >
+              Set Fuel
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rocket Launch Area (Center) -->
+    <div class="col-span-4">
+      <div class="relative bg-gradient-to-b from-blue-900 via-blue-600 to-blue-300 rounded-lg p-4" style="height: 500px;">
+        <!-- Stars background -->
+        <div class="absolute inset-0 overflow-hidden rounded-lg">
+          <%= for i <- 1..20 do %>
+            <div
+              class="absolute text-white animate-pulse"
+              style={"left: #{:rand.uniform(90)}%; top: #{:rand.uniform(40)}%;"}
+            >
+              ✨
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Clouds -->
+        <div class="absolute bottom-24 left-8 text-5xl opacity-70">☁️</div>
+        <div class="absolute bottom-36 right-8 text-4xl opacity-60">☁️</div>
+        <div class="absolute bottom-16 right-24 text-3xl opacity-50">☁️</div>
+
+        <!-- Space marker -->
+        <div class="absolute top-8 left-1/2 transform -translate-x-1/2 text-white text-lg font-bold">
+          🌌 SPACE 🌌
+        </div>
+
+        <!-- Celebration effect -->
+        <%= if @show_celebration do %>
+          <div class="absolute top-16 left-1/2 transform -translate-x-1/2 text-5xl animate-bounce">
+            🎉
+          </div>
+        <% end %>
+
+        <!-- Rocket -->
+        <div
+          class="absolute left-1/2 transform -translate-x-1/2 text-5xl transition-all duration-100"
+          style={"bottom: #{(@rocket_height * 0.8) |> round()}px;"}
+        >
+          <%= if @is_flying do %>
+            <div class="relative">
+              <div class="animate-bounce">🚀</div>
+              <!-- Flame effect when flying -->
+              <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-2xl animate-pulse">
+                🔥
+              </div>
+            </div>
+          <% else %>
+            <div>🚀</div>
+          <% end %>
+        </div>
+
+        <!-- Ground -->
+        <div class="absolute bottom-0 left-0 right-0 h-6 bg-green-400 rounded-b-lg"></div>
+        <div class="absolute bottom-6 left-16 text-xl">🌳</div>
+        <div class="absolute bottom-6 right-12 text-xl">🌲</div>
+        <div class="absolute bottom-6 left-1/3 text-xl">🌻</div>
+      </div>
+
+      <!-- Message Display (moved below game area) -->
+      <%= if @message != "" do %>
+        <div class="mt-4 p-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg text-white text-center text-lg font-bold animate-pulse">
+          <%= @message %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Right Tips Section (Much Much Wider) -->
+    <div class="col-span-5">
+      <!-- How to Play Expanded -->
+      <div class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg p-8 shadow-sm h-full">
+        <h3 class="text-2xl font-bold text-purple-800 mb-6 flex items-center justify-center">
+          <span class="mr-4 text-3xl">🎮</span> How to Play
+        </h3>
+
+        <div class="grid grid-cols-2 gap-6 mb-6">
+          <div class="flex items-start group p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <span class="text-3xl mr-4 group-hover:scale-110 transition-transform">🚀</span>
+            <div>
+              <p class="text-lg font-bold text-purple-900 mb-2">Press LAUNCH</p>
+              <p class="text-base text-purple-700">Click the red button to send your rocket flying up to space! Watch it zoom past the clouds!</p>
+            </div>
+          </div>
+
+          <div class="flex items-start group p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <span class="text-3xl mr-4 group-hover:scale-110 transition-transform">⛽</span>
+            <div>
+              <p class="text-lg font-bold text-purple-900 mb-2">Add Fuel</p>
+              <p class="text-base text-purple-700">Green button adds 20 fuel. You need fuel to fly higher and longer!</p>
+            </div>
+          </div>
+
+          <div class="flex items-start group p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <span class="text-3xl mr-4 group-hover:scale-110 transition-transform">⭐</span>
+            <div>
+              <p class="text-lg font-bold text-purple-900 mb-2">Reach Space</p>
+              <p class="text-base text-purple-700">Fly all the way to the top to collect a shiny star! See how many you can get!</p>
+            </div>
+          </div>
+
+          <div class="flex items-start group p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <span class="text-3xl mr-4 group-hover:scale-110 transition-transform">🔄</span>
+            <div>
+              <p class="text-lg font-bold text-purple-900 mb-2">Reset</p>
+              <p class="text-base text-purple-700">Blue button brings your rocket back to the ground safely for another launch!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fun Facts Section -->
+        <div class="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg p-4 border-l-4 border-yellow-500 mb-4">
+          <h4 class="text-lg font-bold text-yellow-800 mb-2 flex items-center">
+            <span class="mr-2 text-xl">🌟</span> Fun Facts!
+          </h4>
+          <ul class="space-y-2 text-yellow-700">
+            <li class="flex items-start">
+              <span class="mr-2">🚀</span>
+              <span class="text-base">Real rockets need lots of fuel too!</span>
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2">🌌</span>
+              <span class="text-base">Space is 100 kilometers above Earth!</span>
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2">⭐</span>
+              <span class="text-base">There are billions of stars in space!</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Challenge Section -->
+        <div class="bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg p-4 border-l-4 border-pink-500 text-center">
+          <p class="text-xl font-bold text-pink-800 mb-2">🎯 Your Mission</p>
+          <p class="text-lg text-pink-700">How many stars can you collect? Try to beat your record!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
