@@ -1,0 +1,122 @@
+<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold tracking-tight text-gray-900">
+      Game Picker
+    </h1>
+    <p class="mt-2 text-lg text-gray-600">
+      Add your favorite games and let fate decide what to play!
+    </p>
+  </div>
+
+  <!-- Random Game Selection -->
+  <%= if @selected_game do %>
+    <div class="mb-8 p-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-xl text-white">
+      <div class="text-center">
+        <p class="text-sm uppercase tracking-wide mb-2">You should play:</p>
+        <h2 class="text-3xl font-bold mb-2"><%= @selected_game.name %></h2>
+        <%= if @selected_game.description do %>
+          <p class="text-white/90 mb-4"><%= @selected_game.description %></p>
+        <% end %>
+        <button
+          phx-click="clear_selection"
+          class="mt-4 px-4 py-2 bg-white text-purple-600 rounded-md hover:bg-gray-100 transition-colors"
+        >
+          Clear Selection
+        </button>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Pick Random Game Button -->
+  <div class="text-center mb-8">
+    <button
+      phx-click="pick_random"
+      class="px-8 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
+      disabled={Enum.empty?(@games)}
+    >
+      <%= if Enum.empty?(@games) do %>
+        Add Games First
+      <% else %>
+        🎲 Pick Random Game
+      <% end %>
+    </button>
+  </div>
+
+  <!-- Add New Game Form -->
+  <div class="bg-white shadow rounded-lg p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-4">Add New Game</h2>
+
+    <form phx-submit="save" class="space-y-4">
+      <div>
+        <label for="game_name" class="block text-sm font-medium text-gray-700">
+          Game Name
+        </label>
+        <input
+          type="text"
+          name="game[name]"
+          id="game_name"
+          value={Ecto.Changeset.get_field(@changeset, :name) || ""}
+          required
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="Enter game name..."
+        />
+      </div>
+
+      <div>
+        <label for="game_description" class="block text-sm font-medium text-gray-700">
+          Description (optional)
+        </label>
+        <textarea
+          name="game[description]"
+          id="game_description"
+          rows="2"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="Add a brief description..."
+        ><%= Ecto.Changeset.get_field(@changeset, :description) || "" %></textarea>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+      >
+        Add Game
+      </button>
+    </form>
+  </div>
+
+  <!-- Games List -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">
+      Your Games (<%= length(@games) %>)
+    </h2>
+
+    <%= if Enum.empty?(@games) do %>
+      <p class="text-gray-500 text-center py-8">
+        No games added yet. Add your first game above!
+      </p>
+    <% else %>
+      <div class="space-y-3">
+        <%= for game <- @games do %>
+          <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div class="flex-1">
+              <h3 class="font-medium text-gray-900"><%= game.name %></h3>
+              <%= if game.description do %>
+                <p class="text-sm text-gray-600 mt-1"><%= game.description %></p>
+              <% end %>
+            </div>
+            <button
+              phx-click="delete"
+              phx-value-id={game.id}
+              data-confirm="Are you sure you want to delete this game?"
+              class="ml-4 text-red-600 hover:text-red-800 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
